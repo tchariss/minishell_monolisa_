@@ -1,6 +1,12 @@
 #include <string.h>
 #include "libft/libft.h"
 #include "libft/get_next_line.h"
+#include <errno.h>
+#include <signal.h>
+#include <termios.h>
+#include <stdio.h>
+# include <curses.h>
+# include <term.h>
 
 /* Standard file descriptors.  */
 #define STDIN_FILENO    0       /* Standard input.  */
@@ -9,13 +15,32 @@
 
 void	m(char *monna, int lisa);
 
+typedef struct s_flag
+{
+    int f_echo;
+    int f_cd;
+    int f_pwd;
+    int f_export;
+    int f_unset;
+    int f_env;
+    int f_exit;
+	int nothing;
+    int ls;
+    // int f8;
+}				t_flag;      
+
+typedef struct s_tok
+{
+	char **token;
+	int flag;
+}				t_tok;
+
 typedef struct s_monna
 {
 	char	**commands;
 	char	**my_env;
 	char	**tokens;
 	int		status;
-	int		pipe;
 }				t_monna;
 
 void	m(char *monna, int lisa)
@@ -92,65 +117,26 @@ int	ft_lenmassive(char **str)
 	return (i);
 }
 
-int	ft_len(char *line)
+void search(t_flag *fl, char *str)
 {
-	int	i;
-	int	word;
-
-	i = 0;
-	word = 0;
-	while (line[i])
-	{
-		if (line[i] == '\t' || line[i] == ' ')
-		{
-			while (line[i] == '\t' || line[i] == ' ')
-				i++;
-			word++;
-		}
-		if (line[i] == '\0')
-			break;
-		i++;
-	}
-	return (++word);
-}
-
-int	parser(char *line, t_monna *lisa)
-{
-	int	i;
-	int word;
-	int j;
-	int flag;
-
-	i = 0;
-	word = 0;
-	lisa->tokens = (char **)malloc(sizeof(char *) * (ft_len(line) + 1));
-	lisa->tokens[ft_len(line)] = NULL;
-	while (i < ft_len(line))
-	{
-		lisa->tokens[i] = (char *)malloc(sizeof(char) * 100);
-		i++;
-	}
-	i = 0;
-	while (word < ft_len(line) && line[i])
-	{
-		j = 0;
-		flag = 1;
-		while (line[i] && flag)
-		{
-			if (line[i] == '\t' || line[i] == ' ')
-				while (line[i] == '\t' || line[i] == ' ')
-					i++;
-			else
-			{
-				while (line[i] != '\t' && line[i] != ' ' && line[i] != '\0')
-					lisa->tokens[word][j++] = line[i++];
-				flag = 0;
-			}
-		}
-		lisa->tokens[word][j] = '\0';
-		word++;
-	}
-	return (1);
+	if (strcmp(str,"echo") == 0)
+		fl->f_echo = 1;
+	else if (strcmp(str,"cd") == 0)
+		fl->f_cd = 1;
+	else if (strcmp(str,"pwd") == 0)
+		fl->f_pwd = 1;
+	else if (strcmp(str,"export") == 0)
+		fl->f_export = 1;
+	else if (strcmp(str,"unset") == 0)
+		fl->f_unset = 1;
+	else if (strcmp(str,"env") == 0)
+		fl->f_env = 1;
+    else if (strcmp(str,"ls") == 0)
+		fl->f_exit = 1;
+	else if (strcmp(str,"exit") == 0)
+		fl->f_exit = 1;
+	else
+		fl->nothing = 1;
 }
 
 int	main(int argc, char **argv, char **env)
@@ -159,34 +145,80 @@ int	main(int argc, char **argv, char **env)
 	int		status;
 	int		i;
 	t_monna	lisa;
+	pid_t id;
 
+	t_flag fl;
+	t_tok tok;
+
+	if (argc != 1)
+	{
+		printf("Monoliza:");
+		int i = 1;
+		while(argv[i])
+			printf(" %s: ", argv[i++]);
+		printf("No such file or directory\n");
+		return (0);
+	}
+	ft_bzero(&fl ,sizeof(t_flag));
+	// printf("%d\n", fl.f1);
 	ft_davinci();
 	lisa.my_env = (char **)malloc(sizeof(char *) * ft_lenmassive(env) + 1);
 	lisa.my_env[ft_lenmassive(env)] = NULL;
 	i = -1;
 	while (env[++i])
 		lisa.my_env[i] = ft_strdup(env[i]);
+	i = -1;
 	lisa.status = 1;
+
 	while (lisa.status)
 	{
 		ft_putstr_fd("\033[31m༼ つ ◕_◕ ༽つ\033[32m$ ", 1);
-		get_next_line(0, &line); //чтение ввода
-		// printf("%s\n", line);
-		parser(line, &lisa); //парсим строку
-		i = 0;
-		while (lisa.tokens[i])
+		// ft_putstr_fd(tok.token[0], 1);
+		get_next_line(1, &line); //чтение ввода
+		// int d = 0;
+		// while(1)
+		// {
+			// ft_putstr_fd(line, 1);
+			// printf("%d", fl.f_echo);
+			// line = "echo";
+			// ft_putstr_fd("sdfsdfsd \n", 1);
+        ft_bzero(&fl ,sizeof(t_flag));
+		search(&fl, line);
+		if (fl.nothing == 1)
 		{
-			ft_putstr_fd(lisa.tokens[i], 1);
-			write(1, "\n", 1);
-			i++;
+			ft_putstr_fd("Monoliza:", 1);
+			ft_putstr_fd(line , 1);
+			ft_putstr_fd("command not found\n", 1);
+			
 		}
-		if (strcmp("exit", line) == 0)
-		{
-			free(line);
-			break;
-		}
+		else
+			ft_putstr_fd("small step into the minishell!\n", 1);
+       
+		// 	int b;
+		// 	if(strcmp(tok.token[0], str_t[b++] == 0)
+		// 	{
+
+		// }
+		// // get_next_line(1, &line); 
+		// if(strcmp("pwd", line) == 0)
+		// {
+		// 	printf("%s\n",getcwd(NULL, 0));
+		// }
+		// // if(strcmp("ls", line) == 0)
+		// // {
+		// // 	// id = fork();
+		// // 	waitpid(id, 0, 0);
+		// // 	if(id == 0)
+		// // 	{
+		// // 		execve("/bin/ls", argv, env);
+		// // 	}
+		// // }
+		// if (strcmp("exit", line) == 0)
+		// {
+		// 	free(line);
+		// 	break;
+		// }
 		free(line);
-		// lisa.status = executor(&lisa, env); выполнение
 	}
 	return (0);
 }
