@@ -106,3 +106,23 @@ int main(int argc, char **argv, char **env)
 }
 
 
+// echo 
+
+int main(int argc, char **argv, char **env)
+{
+    if (argv[0] == "echo")
+    if (argv[1] == "HOME")
+    if (argv[2] == "HOME")
+    write(1, getenv[1], ft_strlen(argv[1]));
+    write(1, getenv[2], ft_strlen(argv[2]));
+    // char **my_env;
+    // int i;
+
+    // my_env = (char **)malloc(sizeof(char *) * ft_lenmassive(env) + 1);
+    // my_env[ft_lenmassive(env)] = NULL;
+    // i = -1;
+    // while (env[++i])
+    // my_env[i] = ft_strdup(env[i]);
+    // ft_env(my_env, env);
+    // return (0);
+}
