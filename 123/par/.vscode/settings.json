@@ -1,0 +1,11 @@
+{
+    "files.associations": {
+        "__locale": "c",
+        "cstring": "c",
+        "__bit_reference": "c",
+        "algorithm": "c",
+        "bitset": "c",
+        "chrono": "c",
+        "unordered_map": "c"
+    }
+}
